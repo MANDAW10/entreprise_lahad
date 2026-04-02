@@ -18,6 +18,7 @@ class OrderController extends Controller
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email',
             'customer_phone' => 'nullable|string|max:50',
+            'delivery_zone_id' => 'required|exists:delivery_zones,id',
             'shipping_address' => 'required|string',
             'payment_method' => 'required|in:wave,orange_money',
             'payment_phone' => 'required|string|max:50',
@@ -51,7 +52,9 @@ class OrderController extends Controller
             return response()->json(['message' => 'Panier vide ou produits indisponibles.'], 422);
         }
 
-        $shippingCost = 0; // À personnaliser selon adresse
+        $deliveryZone = \App\Models\DeliveryZone::findOrFail($request->delivery_zone_id);
+        $shippingCost = $deliveryZone->fee;
+        
         $total = $subtotal + $shippingCost;
 
         $order = Order::create([
@@ -60,6 +63,7 @@ class OrderController extends Controller
             'customer_name' => $request->customer_name,
             'customer_email' => $request->customer_email,
             'customer_phone' => $request->customer_phone,
+            'delivery_zone_id' => $deliveryZone->id,
             'shipping_address' => $request->shipping_address,
             'subtotal' => $subtotal,
             'shipping_cost' => $shippingCost,

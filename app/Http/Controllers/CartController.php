@@ -9,7 +9,8 @@ class CartController extends Controller
 {
     public function index()
     {
-        return view('cart');
+        $deliveryZones = \App\Models\DeliveryZone::where('is_active', true)->get();
+        return view('cart', compact('deliveryZones'));
     }
 
     public function syncFromLocalStorage(Request $request)

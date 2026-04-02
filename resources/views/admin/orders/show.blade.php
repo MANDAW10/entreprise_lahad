@@ -13,7 +13,11 @@
                 <p><strong>{{ $order->customer_name }}</strong><br>
                 {{ $order->customer_email }}<br>
                 {{ $order->customer_phone }}</p>
-                <p><strong>Adresse livraison :</strong><br>{{ $order->shipping_address }}</p>
+                <p><strong>Adresse livraison :</strong><br>
+                @if($order->deliveryZone)
+                    <span style="font-weight:600; color:var(--primary-dark);">Zone : {{ $order->deliveryZone->name }}</span><br>
+                @endif
+                {{ $order->shipping_address }}</p>
             </div>
         </div>
         <div class="card">

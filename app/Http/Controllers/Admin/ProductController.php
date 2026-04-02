@@ -39,7 +39,7 @@ class ProductController extends Controller
             'stock' => 'required|integer|min:0',
             'stock_alert' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,svg,webp,bmp,tiff,heic,heif,avif,ico|max:10240',
         ]);
 
         $imagePath = null;
@@ -81,7 +81,7 @@ class ProductController extends Controller
             'stock' => 'required|integer|min:0',
             'stock_alert' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,svg,webp,bmp,tiff,heic,heif,avif,ico|max:10240',
         ]);
 
         $data = [

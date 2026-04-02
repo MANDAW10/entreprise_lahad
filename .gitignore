@@ -21,3 +21,12 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+*.zip
+/php82_env/
+/php83/
+/build.log
+/tunnel_cf.log
+/download.cjs
+/start_lt.cjs
+# /vercel.json (Should be kept for deployment)

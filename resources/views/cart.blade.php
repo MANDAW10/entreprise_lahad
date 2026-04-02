@@ -17,7 +17,7 @@
             <aside class="cart-sidebar">
                 <h3>Résumé de facturation</h3>
                 <div class="summary-row"><span>Sous-total</span><span id="summary-subtotal">0 CFA</span></div>
-                <div class="summary-row"><span>Frais de livraison</span><span id="summary-shipping">500 CFA</span></div>
+                <div class="summary-row"><span>Frais de livraison</span><span id="summary-shipping">... CFA</span></div>
                 <div class="summary-row summary-total"><span>Total à payer</span><span id="cart-total">0 CFA</span></div>
 
                 <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Paiement Sécurisé</h3>
@@ -49,8 +49,17 @@
                         <label>Téléphone</label>
                         <input type="text" id="customer_phone" class="form-control" value="{{ auth()->user()->phone ?? '' }}" placeholder="Optionnel">
                     </div>
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label>Zone de livraison</label>
+                        <select id="delivery_zone_id" class="form-control" name="delivery_zone_id" required>
+                            <option value="" data-fee="0">Sélectionnez la destination</option>
+                            @foreach($deliveryZones as $zone)
+                                <option value="{{ $zone->id }}" data-fee="{{ $zone->fee }}">{{ $zone->name }} (+{{ number_format($zone->fee, 0, ',', ' ') }} CFA)</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="form-group">
-                        <label>Adresse de livraison</label>
+                        <label>Adresse détaillée (quartier, rue...)</label>
                         <textarea id="shipping_address" class="form-control" placeholder="Adresse complète">{{ auth()->user()->address ?? '' }}</textarea>
                     </div>
                     <button type="submit" form="checkout-form" class="btn btn-primary w-100">Valider la commande</button>
@@ -69,6 +78,7 @@
             <input type="hidden" name="customer_name" id="customer_name_h">
             <input type="hidden" name="customer_email" id="customer_email_h">
             <input type="hidden" name="customer_phone" id="customer_phone_h">
+            <input type="hidden" name="delivery_zone_id" id="delivery_zone_id_h">
             <input type="hidden" name="shipping_address" id="shipping_address_h">
             <input type="hidden" name="payment_method" id="payment_method" value="wave">
             <input type="hidden" name="payment_phone" id="payment_phone_h">
@@ -108,7 +118,18 @@
 <script>
 (function() {
     var key = 'lahad_cart';
-    var SHIPPING = 500;
+    var SHIPPING = 0;
+    
+    var zoneSelect = document.getElementById('delivery_zone_id');
+    if (zoneSelect) {
+        zoneSelect.addEventListener('change', function() {
+            var fee = this.options[this.selectedIndex].dataset.fee;
+            SHIPPING = parseInt(fee) || 0;
+            document.getElementById('summary-shipping').textContent = SHIPPING + ' CFA';
+            loadCart();
+        });
+    }
+
     function loadCart() {
         var cart = [];
         try { cart = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {}
@@ -175,12 +196,13 @@
         });
     }
     function syncHiddenFields() {
-        var n = document.getElementById('customer_name'), e = document.getElementById('customer_email'), p = document.getElementById('customer_phone'), a = document.getElementById('shipping_address');
-        var nh = document.getElementById('customer_name_h'), eh = document.getElementById('customer_email_h'), ph = document.getElementById('customer_phone_h'), ah = document.getElementById('shipping_address_h');
+        var n = document.getElementById('customer_name'), e = document.getElementById('customer_email'), p = document.getElementById('customer_phone'), a = document.getElementById('shipping_address'), z = document.getElementById('delivery_zone_id');
+        var nh = document.getElementById('customer_name_h'), eh = document.getElementById('customer_email_h'), ph = document.getElementById('customer_phone_h'), ah = document.getElementById('shipping_address_h'), zh = document.getElementById('delivery_zone_id_h');
         if (nh && n) nh.value = n.value;
         if (eh && e) eh.value = e.value;
         if (ph && p) ph.value = p.value;
         if (ah && a) ah.value = a.value;
+        if (zh && z) zh.value = z.value;
     }
     loadCart();
 
@@ -256,13 +278,15 @@
             e.preventDefault();
             var name = (document.getElementById('customer_name') && document.getElementById('customer_name').value.trim()) || '';
             var email = (document.getElementById('customer_email') && document.getElementById('customer_email').value.trim()) || '';
+            var zone = (document.getElementById('delivery_zone_id') && document.getElementById('delivery_zone_id').value.trim()) || '';
             var address = (document.getElementById('shipping_address') && document.getElementById('shipping_address').value.trim()) || '';
-            if (!name || !email || !address) { showToast('Veuillez remplir nom, email et adresse de livraison.', 'error'); return; }
+            if (!name || !email || !zone || !address) { showToast('Veuillez remplir nom, email, zone et détails de livraison.', 'error'); return; }
             syncHiddenFields();
             
             document.getElementById('customer_name_h').value = name;
             document.getElementById('customer_email_h').value = email;
             document.getElementById('customer_phone_h').value = (document.getElementById('customer_phone') && document.getElementById('customer_phone').value) || '';
+            document.getElementById('delivery_zone_id_h').value = zone;
             document.getElementById('shipping_address_h').value = address;
             var payInput = document.querySelector('input[name="payment_method_choice"]:checked');
             var selectedMethod = payInput ? payInput.value : 'wave';

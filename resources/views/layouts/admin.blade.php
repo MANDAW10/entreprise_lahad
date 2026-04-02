@@ -78,6 +78,9 @@
             <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                 <i class="fas fa-shopping-cart"></i> Commandes
             </a>
+            <a href="{{ route('admin.delivery_zones.index') }}" class="{{ request()->routeIs('admin.delivery_zones.*') ? 'active' : '' }}">
+                <i class="fas fa-map-marker-alt"></i> Zones de Livraison
+            </a>
             <a href="{{ route('admin.messages.index') }}" class="{{ request()->routeIs('admin.messages.*') ? 'active' : '' }}">
                 <i class="fas fa-envelope"></i> Messages
                 @php
