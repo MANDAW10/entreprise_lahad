@@ -24,10 +24,16 @@ foreach ($storageFolders as $folder) {
 }
 
 try {
+    // Check if the mandatory SQLite extension is available
+    if (!extension_loaded('pdo_sqlite')) {
+        throw new \Error("L'extension PHP 'pdo_sqlite' n'est pas activée sur ce serveur Vercel. Veuillez vérifier votre version de vercel-php.");
+    }
+    
     require __DIR__ . '/../public/index.php';
-} catch (\Exception $e) {
-    echo "L'application a rencontré une erreur fatale lors du démarrage : <br>";
-    echo "Message : " . $e->getMessage() . "<br>";
-    echo "Fichier : " . $e->getFile() . ":" . $e->getLine() . "<br>";
+} catch (\Throwable $e) {
+    echo "<h1>L'application a rencontré une erreur fatale</h1>";
+    echo "<strong>Message :</strong> " . $e->getMessage() . "<br>";
+    echo "<strong>Fichier :</strong> " . $e->getFile() . " à la ligne " . $e->getLine() . "<br>";
+    echo "<strong>Trace :</strong> <pre>" . $e->getTraceAsString() . "</pre>";
     die();
 }
