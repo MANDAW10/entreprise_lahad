@@ -26,8 +26,10 @@ Route::get('/setup', function (\Illuminate\Http\Request $request) {
         echo "<h3>Diagnostic Lahad Enterprise - Étape $step / 3</h3>";
         
         if ($step == 1) {
-            echo "1. Nettoyage et création des tables... ";
-            Artisan::call('migrate:fresh', ['--force' => true]);
+            echo "1. Nettoyage complet et création des tables... ";
+            // Force drop everything to resolve transaction issues
+            \Illuminate\Support\Facades\Schema::dropAllTables();
+            Artisan::call('migrate', ['--force' => true]);
             echo "<span style='color:green'>OK.</span><br><br>";
             echo "<a href='/setup?step=2' style='padding:10px; background:blue; color:white; text-decoration:none; border-radius:5px;'>➡️ Passer à l'étape 2 (Produits)</a>";
         }
