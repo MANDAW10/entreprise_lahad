@@ -16,6 +16,7 @@ $storageFolders = [
     '/tmp/framework/cache',
     '/tmp/framework/sessions',
     '/tmp/framework/views',
+    '/tmp/views',
 ];
 foreach ($storageFolders as $folder) {
     if (!is_dir($folder)) {
