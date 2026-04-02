@@ -23,6 +23,13 @@ foreach ($storageFolders as $folder) {
     }
 }
 
+// Automatically migrate the database if it doesn't have tables
+if (!file_exists($dbPath) || filesize($dbPath) == 0) {
+    touch($dbPath);
+    // Use the artisan command to migrate and seed
+    shell_exec('php ' . __DIR__ . '/../artisan migrate --seed --force');
+}
+
 try {
     // Check if the mandatory SQLite extension is available
     if (!extension_loaded('pdo_sqlite')) {
