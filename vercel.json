@@ -42,7 +42,7 @@
     ],
     "env": {
         "APP_ENV": "production",
-        "APP_DEBUG": "false",
+        "APP_DEBUG": "true",
         "SESSION_DRIVER": "cookie",
         "LOG_CHANNEL": "stderr",
         "LOG_LEVEL": "debug",
