@@ -24,16 +24,19 @@ Route::get('/setup', function () {
     try {
         echo "Environnement : " . php_uname() . "<br>";
         echo "Version PHP : " . PHP_VERSION . "<br>";
-        $sqlite_version = \DB::select('select sqlite_version() as version')[0]->version;
-        echo "Version SQLite : " . $sqlite_version . "<br><br>";
+        $sqlite_version = \DB::select('select version() as version')[0]->version;
+        echo "Base de données : " . $sqlite_version . "<br><br>";
         
         echo "Initialisation de la base de données...<br>";
-        Artisan::call('migrate', ['--force' => true]);
+        // Fresh migrate first to be sure
+        Artisan::call('migrate:fresh', ['--force' => true]);
         echo "Migrations terminées.<br>";
+        
+        echo "Chargement des catégories et produits...<br>";
         Artisan::call('db:seed', ['--force' => true]);
         echo "Seeding terminé.<br>";
         
-        // Force admin creation if seeder failed
+        // Force admin creation
         if (!\App\Models\User::where('email', 'admin@lahad.com')->exists()) {
             \App\Models\User::create([
                 'name' => 'Admin Lahad',
@@ -41,12 +44,12 @@ Route::get('/setup', function () {
                 'password' => \Illuminate\Support\Facades\Hash::make('password'),
                 'is_admin' => true,
             ]);
-            echo "Utilisateur Admin créé.<br>";
+            echo "Utilisateur Admin recréé.<br>";
         }
         
-        return "Installation terminée avec succès ! <a href='/'>Retour à l'accueil</a>";
+        return "⚡ Installation terminée avec succès ! <a href='/'>Retour à l'accueil</a>";
     } catch (\Exception $e) {
-        return "Erreur lors de l'installation : " . $e->getMessage();
+        return "❌ Erreur lors de l'installation : " . $e->getMessage();
     }
 });
 
