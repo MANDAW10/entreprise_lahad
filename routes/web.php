@@ -20,47 +20,7 @@ use App\Http\Controllers\NotificationController as ClientNotificationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
-Route::get('/setup', function (\Illuminate\Http\Request $request) {
-    $step = $request->get('step', 1);
-    try {
-        echo "<h3>Diagnostic Lahad Enterprise - Étape $step / 3</h3>";
-        
-        if ($step == 1) {
-            echo "1. Nettoyage complet et création des tables... ";
-            // Force drop everything to resolve transaction issues
-            \Illuminate\Support\Facades\Schema::dropAllTables();
-            Artisan::call('migrate', ['--force' => true]);
-            echo "<span style='color:green'>OK.</span><br><br>";
-            echo "<a href='/setup?step=2' style='padding:10px; background:blue; color:white; text-decoration:none; border-radius:5px;'>➡️ Passer à l'étape 2 (Produits)</a>";
-        }
-        
-        if ($step == 2) {
-            echo "2. Chargement des catégories et produits... ";
-            Artisan::call('db:seed', ['--force' => true]);
-            echo "<span style='color:green'>OK.</span><br><br>";
-            echo "<a href='/setup?step=3' style='padding:10px; background:blue; color:white; text-decoration:none; border-radius:5px;'>➡️ Passer à l'étape 3 (Admin)</a>";
-        }
-        
-        if ($step == 3) {
-            echo "3. Création du compte Admin... ";
-            if (!\App\Models\User::where('email', 'admin@lahad.com')->exists()) {
-                \App\Models\User::create([
-                    'name' => 'Admin Lahad',
-                    'email' => 'admin@lahad.com',
-                    'password' => \Illuminate\Support\Facades\Hash::make('password'),
-                    'is_admin' => true,
-                ]);
-            }
-            echo "<span style='color:green'>OK.</span><br><br>";
-            return "<h2 style='color:green'>⚡ Félicitations ! Tout est installé.</h2> <a href='/'>Aller sur le site</a>";
-        }
-        
-        return "";
-    } catch (\Exception $e) {
-        return "<h2 style='color:red'>❌ Erreur à l'étape $step</h2>" . 
-               "<strong>Message :</strong> " . $e->getMessage();
-    }
-});
+// Vos autres routes ci-dessous...
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/produits', [ProductController::class, 'index'])->name('products.index');
