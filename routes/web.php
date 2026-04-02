@@ -22,21 +22,27 @@ use Illuminate\Support\Facades\Artisan;
 
 Route::get('/setup', function () {
     try {
+        echo "<h3>Diagnostic Lahad Enterprise</h3>";
         echo "Environnement : " . php_uname() . "<br>";
         echo "Version PHP : " . PHP_VERSION . "<br>";
-        $sqlite_version = \DB::select('select version() as version')[0]->version;
-        echo "Base de données : " . $sqlite_version . "<br><br>";
         
-        echo "Initialisation de la base de données...<br>";
-        // Fresh migrate first to be sure
+        // Test de connexion direct
+        echo "Vérification de la connexion à Supabase... ";
+        \DB::connection()->getPdo();
+        echo "<span style='color:green'>Réussie !</span><br><br>";
+        
+        $db_version = \DB::select('select version() as version')[0]->version;
+        echo "Base de données : " . $db_version . "<br><br>";
+        
+        echo "1. Nettoyage de la base de données... ";
         Artisan::call('migrate:fresh', ['--force' => true]);
-        echo "Migrations terminées.<br>";
+        echo "OK.<br>";
         
-        echo "Chargement des catégories et produits...<br>";
+        echo "2. Création des catégories et produits... ";
         Artisan::call('db:seed', ['--force' => true]);
-        echo "Seeding terminé.<br>";
+        echo "OK.<br>";
         
-        // Force admin creation
+        echo "3. Création du compte Admin (admin@lahad.com)... ";
         if (!\App\Models\User::where('email', 'admin@lahad.com')->exists()) {
             \App\Models\User::create([
                 'name' => 'Admin Lahad',
@@ -44,12 +50,14 @@ Route::get('/setup', function () {
                 'password' => \Illuminate\Support\Facades\Hash::make('password'),
                 'is_admin' => true,
             ]);
-            echo "Utilisateur Admin recréé.<br>";
         }
+        echo "OK.<br><br>";
         
-        return "⚡ Installation terminée avec succès ! <a href='/'>Retour à l'accueil</a>";
+        return "<h2 style='color:green'>⚡ Tout est prêt !</h2> <a href='/'>Cliquez ici pour voir le site</a>";
     } catch (\Exception $e) {
-        return "❌ Erreur lors de l'installation : " . $e->getMessage();
+        return "<h2 style='color:red'>❌ Erreur détectée</h2>" . 
+               "<strong>Message :</strong> " . $e->getMessage() . "<br>" .
+               "<strong>Fichier :</strong> " . $e->getFile() . " (Ligne " . $e->getLine() . ")";
     }
 });
 
