@@ -26,13 +26,15 @@ foreach ($storageFolders as $folder) {
 // Automatically migrate the database if it doesn't have tables
 if (!file_exists($dbPath) || filesize($dbPath) == 0) {
     touch($dbPath);
-    // Use the artisan command to migrate and seed
-    shell_exec('php ' . __DIR__ . '/../artisan migrate --seed --force');
+    shell_exec('php ' . __DIR__ . '/../artisan migrate --force');
 }
 
-// Fail-safe: Ensure admin user exists (one-time fix for login issues)
+// Ensure the admin user and default categories/products exist if tables are empty
 try {
-    // This is a quick injection to make sure the user is there
+    // We check if categories exist, and if not, we run the seeders
+    shell_exec('php ' . __DIR__ . '/../artisan tinker --execute="if(!\App\Models\Category::exists()) { \Illuminate\Support\Facades\Artisan::call(\'db:seed\', [\'--force\' => true]); }"');
+    
+    // Fail-safe for admin user too
     shell_exec('php ' . __DIR__ . '/../artisan tinker --execute="if(!\App\Models\User::where(\'email\', \'admin@lahad.com\')->exists()) { \App\Models\User::create([\'name\' => \'Admin Lahad\', \'email\' => \'admin@lahad.com\', \'password\' => \Illuminate\Support\Facades\Hash::make(\'password\'), \'is_admin\' => true]); }"');
 } catch (\Throwable $e) {}
 
