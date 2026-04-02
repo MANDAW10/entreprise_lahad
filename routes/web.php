@@ -20,44 +20,43 @@ use App\Http\Controllers\NotificationController as ClientNotificationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
-Route::get('/setup', function () {
+Route::get('/setup', function (\Illuminate\Http\Request $request) {
+    $step = $request->get('step', 1);
     try {
-        echo "<h3>Diagnostic Lahad Enterprise</h3>";
-        echo "Environnement : " . php_uname() . "<br>";
-        echo "Version PHP : " . PHP_VERSION . "<br>";
+        echo "<h3>Diagnostic Lahad Enterprise - Étape $step / 3</h3>";
         
-        // Test de connexion direct
-        echo "Vérification de la connexion à Supabase... ";
-        \DB::connection()->getPdo();
-        echo "<span style='color:green'>Réussie !</span><br><br>";
-        
-        $db_version = \DB::select('select version() as version')[0]->version;
-        echo "Base de données : " . $db_version . "<br><br>";
-        
-        echo "1. Nettoyage de la base de données... ";
-        Artisan::call('migrate:fresh', ['--force' => true]);
-        echo "OK.<br>";
-        
-        echo "2. Création des catégories et produits... ";
-        Artisan::call('db:seed', ['--force' => true]);
-        echo "OK.<br>";
-        
-        echo "3. Création du compte Admin (admin@lahad.com)... ";
-        if (!\App\Models\User::where('email', 'admin@lahad.com')->exists()) {
-            \App\Models\User::create([
-                'name' => 'Admin Lahad',
-                'email' => 'admin@lahad.com',
-                'password' => \Illuminate\Support\Facades\Hash::make('password'),
-                'is_admin' => true,
-            ]);
+        if ($step == 1) {
+            echo "1. Nettoyage et création des tables... ";
+            Artisan::call('migrate:fresh', ['--force' => true]);
+            echo "<span style='color:green'>OK.</span><br><br>";
+            echo "<a href='/setup?step=2' style='padding:10px; background:blue; color:white; text-decoration:none; border-radius:5px;'>➡️ Passer à l'étape 2 (Produits)</a>";
         }
-        echo "OK.<br><br>";
         
-        return "<h2 style='color:green'>⚡ Tout est prêt !</h2> <a href='/'>Cliquez ici pour voir le site</a>";
+        if ($step == 2) {
+            echo "2. Chargement des catégories et produits... ";
+            Artisan::call('db:seed', ['--force' => true]);
+            echo "<span style='color:green'>OK.</span><br><br>";
+            echo "<a href='/setup?step=3' style='padding:10px; background:blue; color:white; text-decoration:none; border-radius:5px;'>➡️ Passer à l'étape 3 (Admin)</a>";
+        }
+        
+        if ($step == 3) {
+            echo "3. Création du compte Admin... ";
+            if (!\App\Models\User::where('email', 'admin@lahad.com')->exists()) {
+                \App\Models\User::create([
+                    'name' => 'Admin Lahad',
+                    'email' => 'admin@lahad.com',
+                    'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                    'is_admin' => true,
+                ]);
+            }
+            echo "<span style='color:green'>OK.</span><br><br>";
+            return "<h2 style='color:green'>⚡ Félicitations ! Tout est installé.</h2> <a href='/'>Aller sur le site</a>";
+        }
+        
+        return "";
     } catch (\Exception $e) {
-        return "<h2 style='color:red'>❌ Erreur détectée</h2>" . 
-               "<strong>Message :</strong> " . $e->getMessage() . "<br>" .
-               "<strong>Fichier :</strong> " . $e->getFile() . " (Ligne " . $e->getLine() . ")";
+        return "<h2 style='color:red'>❌ Erreur à l'étape $step</h2>" . 
+               "<strong>Message :</strong> " . $e->getMessage();
     }
 });
 
