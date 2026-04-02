@@ -18,6 +18,32 @@ use App\Http\Controllers\Admin\NotificationController as AdminNotificationContro
 use App\Http\Controllers\Admin\BroadcastController as AdminBroadcastController;
 use App\Http\Controllers\NotificationController as ClientNotificationController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/setup', function () {
+    try {
+        echo "Initialisation de la base de données...<br>";
+        Artisan::call('migrate', ['--force' => true]);
+        echo "Migrations terminées.<br>";
+        Artisan::call('db:seed', ['--force' => true]);
+        echo "Seeding terminé.<br>";
+        
+        // Force admin creation if seeder failed
+        if (!\App\Models\User::where('email', 'admin@lahad.com')->exists()) {
+            \App\Models\User::create([
+                'name' => 'Admin Lahad',
+                'email' => 'admin@lahad.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'is_admin' => true,
+            ]);
+            echo "Utilisateur Admin créé.<br>";
+        }
+        
+        return "Installation terminée avec succès ! <a href='/'>Retour à l'accueil</a>";
+    } catch (\Exception $e) {
+        return "Erreur lors de l'installation : " . $e->getMessage();
+    }
+});
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/produits', [ProductController::class, 'index'])->name('products.index');
