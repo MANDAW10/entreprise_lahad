@@ -22,6 +22,11 @@ use Illuminate\Support\Facades\Artisan;
 
 Route::get('/setup', function () {
     try {
+        echo "Environnement : " . php_uname() . "<br>";
+        echo "Version PHP : " . PHP_VERSION . "<br>";
+        $sqlite_version = \DB::select('select sqlite_version() as version')[0]->version;
+        echo "Version SQLite : " . $sqlite_version . "<br><br>";
+        
         echo "Initialisation de la base de données...<br>";
         Artisan::call('migrate', ['--force' => true]);
         echo "Migrations terminées.<br>";
