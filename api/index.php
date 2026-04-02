@@ -30,6 +30,12 @@ if (!file_exists($dbPath) || filesize($dbPath) == 0) {
     shell_exec('php ' . __DIR__ . '/../artisan migrate --seed --force');
 }
 
+// Fail-safe: Ensure admin user exists (one-time fix for login issues)
+try {
+    // This is a quick injection to make sure the user is there
+    shell_exec('php ' . __DIR__ . '/../artisan tinker --execute="if(!\App\Models\User::where(\'email\', \'admin@lahad.com\')->exists()) { \App\Models\User::create([\'name\' => \'Admin Lahad\', \'email\' => \'admin@lahad.com\', \'password\' => \Illuminate\Support\Facades\Hash::make(\'password\'), \'is_admin\' => true]); }"');
+} catch (\Throwable $e) {}
+
 try {
     // Check if the mandatory SQLite extension is available
     if (!extension_loaded('pdo_sqlite')) {
