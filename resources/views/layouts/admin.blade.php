@@ -11,7 +11,18 @@
 </head>
 <body>
     <div class="admin-layout">
-        <aside class="admin-sidebar">
+        <div class="admin-mobile-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-leaf" style="color: var(--primary);"></i> Lahad Admin
+            </div>
+            <button class="btn btn-sm" id="mobileMenuBtn" style="background: var(--primary-light); color: var(--primary);">
+                <i class="fas fa-bars"></i> Menu
+            </button>
+        </div>
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <aside class="admin-sidebar" id="adminSidebar">
             <div class="sidebar-logo">
                 <i class="fas fa-leaf" style="color: var(--primary);"></i> Lahad Admin
                 
@@ -58,12 +69,34 @@
             <script>
                 // CSS pour montrer/cacher le dropdown
                 document.head.insertAdjacentHTML("beforeend", `<style>.dropdown-menu.show { display: block !important; }</style>`)
-                // Fermer si on clique ailleurs
+                
+                // Notifications dropdown
                 document.addEventListener('click', function(e) {
-                    if (!e.target.closest('.header-notifications')) {
+                    if (e.target.closest('.header-notifications')) {
+                        document.getElementById('notif-dropdown').classList.toggle('show');
+                    } else {
                         document.getElementById('notif-dropdown').classList.remove('show');
                     }
                 });
+
+                // Sidebar Toggle Mobile
+                const sidebar = document.getElementById('adminSidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                const menuBtn = document.getElementById('mobileMenuBtn');
+
+                if (menuBtn) {
+                    menuBtn.addEventListener('click', () => {
+                        sidebar.classList.toggle('active');
+                        overlay.classList.toggle('active');
+                    });
+                }
+
+                if (overlay) {
+                    overlay.addEventListener('click', () => {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    });
+                }
             </script>
             
             <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
